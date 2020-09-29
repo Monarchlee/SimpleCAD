@@ -43,6 +43,25 @@ namespace Volume
             long length = Length / 32;
             data = new int[length];
         }
+        public Volume()
+        {
+            Size = Vector3.one;
+            Density = Vector3Int.one * 256;
+            long length = Length / 32;
+            data = new int[length];
+            for(int j = 0; j < Density.y; j++)
+            {
+                for(int i = 0; i < Density.x; i++)
+                {
+                    for(int k = 0; k < Density.z; k++)
+                    {
+                        Vector3Int v = new Vector3Int(i, j, k);
+                        if (v.sqrMagnitude <= 10000) this[v] = 0;
+                        else this[v] = 1;
+                    }
+                }
+            }
+        }
 
         public long Length => Density.x * Density.y * ((Density.z + 31) & (~31));
         public long BufferSize => Length * 5;
