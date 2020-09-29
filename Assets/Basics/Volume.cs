@@ -12,7 +12,7 @@ namespace Volume
         /// <summary>
         /// 储存体积
         /// </summary>
-        byte[] data;
+        int[] data;
 
         /// <summary>
         /// 展示箱的大小
@@ -40,28 +40,31 @@ namespace Volume
         {
             Size = size;
             Density = density;
-            long length = Length / 8 + (((Length % 8) == 0) ? 0 : 1);
-            data = new byte[length];
+            long length = Length / 32;
+            data = new int[length];
         }
 
-        public long Length => (Density.x + 1) * (Density.y + 1) * (Density.z + 1);
+        public long Length => Density.x * Density.y * ((Density.z + 31) & (~31));
 
-        public float this[Vector3Int v]
+        //注意，储存顺序是z→x→y，排列最密的是z，其次是x，最疏的是y
+        public int this[Vector3Int v]
         {
             get
             {
-                long index = (v.z * (Density.z + 1) + v.y) * (Density.y + 1) + v.x;
-                byte target = data[index / 8];
-                if ((target & (1 << (int)(index % 8))) == 0) return 0;
+                if (v.x >= Density.x || v.y >= Density.y || v.z >= Density.z) throw new System.IndexOutOfRangeException();
+                long index = (v.y * Density.y + v.x) * Density.x + v.z;
+                int target = data[index / 32];
+                if ((target & (1 << (int)(index % 32))) == 0) return 0;
                 else return 1;
             }
             set
             {
-                long index = (v.z * (Density.z + 1) + v.y) * (Density.y + 1) + v.x;
-                byte target = data[index / 8];
+                if (v.x >= Density.x || v.y >= Density.y || v.z >= Density.z) throw new System.IndexOutOfRangeException();
+                long index = (v.y * Density.y + v.x) * Density.x + v.z;
+                int target = data[index / 32];
                 int insert = value > 0 ? 1 : 0;
-                target &= (byte)(insert << (int)(index % 8));
-                data[index / 8] = target;
+                target &= (byte)(insert << (int)(index % 32));
+                data[index / 32] = target;
             }
         }
 
