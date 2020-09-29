@@ -45,6 +45,7 @@ namespace Volume
         }
 
         public long Length => Density.x * Density.y * ((Density.z + 31) & (~31));
+        public long BufferSize => Length * 5;
 
         //注意，储存顺序是z→x→y，排列最密的是z，其次是x，最疏的是y
         public int this[Vector3Int v]
