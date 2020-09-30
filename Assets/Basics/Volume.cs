@@ -4,7 +4,7 @@ using UnityEngine;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Volume
+namespace VolumeData
 {
     [System.Serializable]
     public class Volume
@@ -12,7 +12,7 @@ namespace Volume
         /// <summary>
         /// 储存体积
         /// </summary>
-        int[] data;
+        public int[] data;
 
         /// <summary>
         /// 展示箱的大小
@@ -40,15 +40,13 @@ namespace Volume
         {
             Size = size;
             Density = density;
-            long length = Length / 32;
-            data = new int[length];
+            data = new int[DataLength];
         }
         public Volume()
         {
             Size = Vector3.one;
             Density = Vector3Int.one * 256;
-            long length = Length / 32;
-            data = new int[length];
+            data = new int[DataLength];
             for(int j = 0; j < Density.y; j++)
             {
                 for(int i = 0; i < Density.x; i++)
@@ -63,8 +61,18 @@ namespace Volume
             }
         }
 
-        public long Length => Density.x * Density.y * ((Density.z + 31) & (~31));
-        public long BufferSize => Length * 5;
+        /// <summary>
+        /// Cube的个数
+        /// </summary>
+        public int CubeCount => Density.x * Density.y * ((Density.z + 31) & (~31));
+        /// <summary>
+        /// Data数组的长度
+        /// </summary>
+        public int DataLength => CubeCount / 32;
+        /// <summary>
+        /// 三维向量的个数
+        /// </summary>
+        public int BufferSize => CubeCount * 15;
 
         //注意，储存顺序是z→x→y，排列最密的是z，其次是x，最疏的是y
         public int this[Vector3Int v]
