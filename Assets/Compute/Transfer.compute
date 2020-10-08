@@ -1,0 +1,42 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel ReadData
+#pragma kernel WriteData
+
+static const int numThreads = 8;
+
+int numPointsX;
+int numPointsY;
+int numPointsZ;
+float3 cellSize;
+
+RWStructuredBuffer<float> datas;
+RWStructuredBuffer<float4> points;
+
+int indexFromCoord(int x, int y, int z) {
+    return y * numPointsY * numPointsX + x * numPointsX + z;
+}
+
+[numthreads(numThreads,numThreads,numThreads)]
+void ReadData (uint3 id : SV_DispatchThreadID)
+{
+    float3 pos = id * cellSize - float3(numPointsX-1, numPointsY-1, numPointsZ-1) * cellSize * 0.5f;
+
+    int index = indexFromCoord(id.x, id.y, id.z);
+
+    float value = datas[index];
+
+    points[index] = float4(pos, value);
+}
+
+
+[numthreads(numThreads,numThreads,numThreads)]
+void WriteData (uint3 id : SV_DispatchThreadID)
+{
+    float3 pos = id * cellSize;
+
+    int index = indexFromCoord(id.x, id.y, id.z);
+
+    float value = points[index].w;
+
+    datas[index] = value;
+}
