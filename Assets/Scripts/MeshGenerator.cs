@@ -5,15 +5,19 @@ using VolumeData;
 
 public class MeshGenerator : MonoBehaviour
 {
+    #region Properties
     [SerializeField] ComputeShader march = null;
     [SerializeField] ComputeShader transfer = null;
     [SerializeField] Material mat = null;
 
     [SerializeField] float isoLevel = 0;
+    #endregion
 
+    #region Buffers
     ComputeBuffer triangleBuffer;
     ComputeBuffer pointsBuffer;
     ComputeBuffer triCountBuffer;
+    #endregion
 
     public void WriteData(Volume volume)
     {
@@ -81,25 +85,50 @@ public class MeshGenerator : MonoBehaviour
         triangleBuffer.GetData(tris, 0, 0, numTris);
 
         Vector3[] vertices = new Vector3[numTris * 3];
-        int[] triangles = new int[numTris * 3];
+        int[] triangles;
 
         for (int i = 0; i < numTris; i++)
         {
             for (int j = 0; j < 3; j++)
             {
                 vertices[i * 3 + j] = tris[i][j];
-                triangles[i * 3 + j] = i * 3 + j;
             }
         }
+
+        int vertexCount = CompressVertices(ref vertices, out triangles);
 
         mesh.vertices = vertices;
         mesh.triangles = triangles;
 
-        Debug.Log(mesh.triangles[65536]);
+        Debug.Log(vertexCount);
 
         mesh.RecalculateNormals();
 
         return mesh;
+    }
+
+    int CompressVertices(ref Vector3[] vertices, out int[] triangles)
+    {
+        Dictionary<Vector3, int> hash = new Dictionary<Vector3, int>();
+        int index = 0;
+
+        triangles = new int[vertices.Length];
+        List<Vector3> vertexs = new List<Vector3>();
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            if(!hash.ContainsKey(vertices[i]))
+            {
+                hash.Add(vertices[i], index);
+                vertexs.Add(vertices[i]);
+                index++;
+            }
+            triangles[i] = hash[vertices[i]];
+        }
+
+        vertices = vertexs.ToArray();
+
+        return hash.Count;
     }
 
     public void UnloadBuffer()
