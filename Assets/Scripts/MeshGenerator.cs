@@ -17,7 +17,7 @@ public class MeshGenerator : MonoBehaviour
 
     public void WriteData(Volume volume)
     {
-        Vector3Int threadCount = volume.VoxelThreadCount;
+        Vector3Int threadCount = volume.SamplesThreadCount;
 
         ComputeBuffer dataBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float));
         transfer.SetInt("numPointsX", volume.SamplesDensity.x);
@@ -114,6 +114,11 @@ public class MeshGenerator : MonoBehaviour
         Mesh mesh = GenerateMesh(sphere);
         GetComponent<MeshFilter>().mesh = mesh;
         UnloadBuffer();
+
+        foreach(Vector3 v in mesh.vertices)
+        {
+            Debug.Log(v);
+        }
     }
 
 }

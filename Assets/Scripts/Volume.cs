@@ -49,9 +49,9 @@ namespace VolumeData
         /// </summary>
         public Volume()
         {
-            Size = Vector3.one;
-            SamplesDensity = Vector3Int.one * 200;
-            Vector3 center = Vector3.one * 99.5f;
+            Size = Vector3.one * 10;
+            SamplesDensity = Vector3Int.one * 64;
+            Vector3 center = Vector3.one * 31.5f;
             data = new float[SamplesCount];
             for(int j = 0; j < SamplesDensity.y; j++)
             {
@@ -60,7 +60,7 @@ namespace VolumeData
                     for(int k = 0; k < SamplesDensity.z; k++)
                     {
                         Vector3Int v = new Vector3Int(i, j, k);
-                        this[v] = 1000 - (v - center).sqrMagnitude;
+                        this[v] = 900 - (v - center).sqrMagnitude;
                     }
                 }
             }
@@ -86,16 +86,16 @@ namespace VolumeData
         /// <summary>
         /// 每个方向上线程的个数
         /// </summary>
-        public Vector3Int VoxelThreadCount => new Vector3Int(Mathf.CeilToInt((float)VoxelsDensity.x / 8), Mathf.CeilToInt((float)VoxelsDensity.y / 8), Mathf.CeilToInt((float)VoxelsDensity.z / 8));
+        public Vector3Int VoxelThreadCount => new Vector3Int(Mathf.CeilToInt((float)VoxelsDensity.x / 8f), Mathf.CeilToInt((float)VoxelsDensity.y / 8f), Mathf.CeilToInt((float)VoxelsDensity.z / 8f));
         /// <summary>
         /// 每个方向上线程的个数
         /// </summary>
-        public Vector3Int SamplesThreadCount => new Vector3Int(Mathf.CeilToInt((float)SamplesDensity.x / 8), Mathf.CeilToInt((float)SamplesDensity.y / 8), Mathf.CeilToInt((float)SamplesDensity.z / 8));
+        public Vector3Int SamplesThreadCount => new Vector3Int(Mathf.CeilToInt((float)SamplesDensity.x / 8f), Mathf.CeilToInt((float)SamplesDensity.y / 8f), Mathf.CeilToInt((float)SamplesDensity.z / 8f));
         #endregion
 
         private int GetIndex(Vector3Int v)
         {
-            return (v.y * SamplesDensity.y + v.z) * SamplesDensity.z + v.x;
+            return (v.y * SamplesDensity.y + v.x) * SamplesDensity.x + v.z;
         }
 
         /// <summary>

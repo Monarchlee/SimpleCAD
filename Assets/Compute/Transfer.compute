@@ -19,6 +19,10 @@ int indexFromCoord(int x, int y, int z) {
 [numthreads(numThreads,numThreads,numThreads)]
 void ReadData (uint3 id : SV_DispatchThreadID)
 {
+    if (id.x >= numPointsX || id.y >= numPointsY || id.z >= numPointsZ) {
+        return;
+    }
+
     float3 pos = id * cellSize - float3(numPointsX-1, numPointsY-1, numPointsZ-1) * cellSize * 0.5f;
 
     int index = indexFromCoord(id.x, id.y, id.z);
