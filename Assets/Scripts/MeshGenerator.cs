@@ -76,24 +76,26 @@ public class MeshGenerator : MonoBehaviour
         ComputeBuffer.CopyCount(triangleBuffer, triCountBuffer, 0);
         triCountBuffer.GetData(triCountArray);
         int numTris = triCountArray[0];
-        Debug.Log("Triangles:" + numTris + "/" + volume.VoxelCount * 5);
 
         Triangle[] tris = new Triangle[numTris];
         triangleBuffer.GetData(tris, 0, 0, numTris);
 
-        var vertices = new Vector3[numTris * 3];
-        var meshTriangles = new int[numTris * 3];
+        Vector3[] vertices = new Vector3[numTris * 3];
+        int[] triangles = new int[numTris * 3];
 
         for (int i = 0; i < numTris; i++)
         {
             for (int j = 0; j < 3; j++)
             {
-                meshTriangles[i * 3 + j] = i * 3 + j;
                 vertices[i * 3 + j] = tris[i][j];
+                triangles[i * 3 + j] = i * 3 + j;
             }
         }
+
         mesh.vertices = vertices;
-        mesh.triangles = meshTriangles;
+        mesh.triangles = triangles;
+
+        Debug.Log(mesh.triangles[65536]);
 
         mesh.RecalculateNormals();
 
@@ -115,10 +117,28 @@ public class MeshGenerator : MonoBehaviour
         GetComponent<MeshFilter>().mesh = mesh;
         UnloadBuffer();
 
-        foreach(Vector3 v in mesh.vertices)
+        /*
+        using(System.IO.FileStream fs = new System.IO.FileStream("D:/Vertices.txt",System.IO.FileMode.OpenOrCreate))
         {
-            Debug.Log(v);
+            System.IO.StreamWriter sw = new System.IO.StreamWriter(fs);
+            string str = "";
+
+            for (int i = 0; i < mesh.vertices.Length; i++)
+            {
+                str = mesh.triangles[i] + ":" + mesh.vertices[i] + "\n";
+                sw.Write(str);
+                sw.Flush();
+                if (i % 200 == 0)
+                {
+                    Debug.Log("Flash:" + i / 200);
+                    yield return 0;
+                }
+            }
+
+            sw.Close();
+            fs.Close();
         }
+        */
     }
 
 }
