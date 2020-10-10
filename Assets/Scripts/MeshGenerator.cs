@@ -19,6 +19,11 @@ public class MeshGenerator : MonoBehaviour
     ComputeBuffer triCountBuffer;
     #endregion
 
+    #region Mesh
+    MeshFilter filter = null;
+    new MeshCollider collider = null;
+    #endregion
+
     public void WriteData(Volume volume)
     {
         Vector3Int threadCount = volume.SamplesThreadCount;
@@ -147,12 +152,21 @@ public class MeshGenerator : MonoBehaviour
         triCountBuffer.Dispose();
     }
 
+    public void SetMesh(Mesh mesh)
+    {
+        filter.mesh = mesh;
+        collider.sharedMesh = mesh;
+    }
+
     private void Start()
     {
+        filter = GetComponent<MeshFilter>();
+        collider = GetComponent<MeshCollider>();
+
         Volume sphere = new Volume();
         ReadData(sphere);
         Mesh mesh = GenerateMesh(sphere);
-        GetComponent<MeshFilter>().mesh = mesh;
+        SetMesh(mesh);
         UnloadBuffer();
 
         /*

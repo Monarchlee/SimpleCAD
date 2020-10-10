@@ -49,7 +49,7 @@ namespace VolumeData
         /// </summary>
         public Volume()
         {
-            Size = Vector3.one;
+            Size = Vector3.one * 15;
             SamplesDensity = Vector3Int.one * 64;
             Vector3 center = Vector3.one * 31.5f;
             data = new float[SamplesCount];

@@ -7,19 +7,18 @@ public class Mouse : MonoBehaviour
 {
     public Camera m_Camera;
     public Vector3 size = new Vector3(0.5f, 0.5f, 0.5f);
-    public GameObject sphere;
+    //public GameObject sphere;
     private Vector3 position = new Vector3(0, 0, 0);
-
+    [SerializeField] GameObject cursor;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        sphere.transform.localScale = size;
-        sphere.transform.position = position;
-        Destroy(sphere.GetComponent<SphereCollider>());
-        sphere.SetActive(false);
+        cursor = Instantiate(cursor);
+        cursor.transform.localScale = size;
+        cursor.transform.position = position;
+        cursor.SetActive(false);
 
     }
 
@@ -28,12 +27,13 @@ public class Mouse : MonoBehaviour
     {
         Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if (sphere.activeSelf == false)
-            sphere.SetActive(true);
+        if (cursor.activeSelf == false)
+            cursor.SetActive(true);
         if (Physics.Raycast(ray, out hit))//击中mesh
         {
             position = hit.point;
-            sphere.transform.position = position;
+            cursor.transform.position = position;
+            cursor.transform.LookAt(position + hit.normal);
         }
         if (Input.GetMouseButtonDown(0))
         {

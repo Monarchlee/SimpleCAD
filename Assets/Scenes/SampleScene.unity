@@ -170,7 +170,7 @@ MeshCollider:
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!23 &414056360
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -401,8 +401,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: -0.1892692, y: 0.74026245, z: -0.23290195, w: -0.6016191}
-  m_LocalPosition: {x: 1.128715, y: 0.8293601, z: 0.40518582}
+  m_LocalRotation: {x: -0.20284003, y: 0.20171171, z: -0.042740647, w: -0.9572573}
+  m_LocalPosition: {x: 9.935005, y: 8.033962, z: -18.772331}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -422,4 +422,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Camera: {fileID: 963194227}
   size: {x: 0.5, y: 0.5, z: 0.5}
-  sphere: {fileID: 0}
+  cursor: {fileID: 2222737571690788918, guid: 24445b3be998a2f43b5d8321c823f9fb, type: 3}
