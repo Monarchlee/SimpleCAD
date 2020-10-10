@@ -97,10 +97,19 @@ public class MeshGenerator : MonoBehaviour
 
         int vertexCount = CompressVertices(ref vertices, out triangles);
 
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
+        if(vertexCount >= 65536)
+        {
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        }
+        else
+        {
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
+        }
 
         Debug.Log(vertexCount);
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
 
         mesh.RecalculateNormals();
 
