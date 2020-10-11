@@ -72,6 +72,7 @@ public class MeshGenerator : MonoBehaviour
         triangleBuffer.SetCounterValue(0);
         march.SetBuffer(0, "points", pointsBuffer);
         march.SetBuffer(0, "triangles", triangleBuffer);
+        march.SetVector("base", Vector4.zero);
         march.SetInt("numPointsX", volume.SamplesDensity.x);
         march.SetInt("numPointsY", volume.SamplesDensity.y);
         march.SetInt("numPointsZ", volume.SamplesDensity.z);

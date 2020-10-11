@@ -13,6 +13,8 @@ struct Triangle {
 AppendStructuredBuffer<Triangle> triangles;
 RWStructuredBuffer<float4> points;
 
+float3 base;
+
 int numPointsX;
 int numPointsY;
 int numPointsZ;
@@ -31,6 +33,10 @@ int indexFromCoord(int x, int y, int z) {
 [numthreads(numThreads,numThreads,numThreads)]
 void March (uint3 id : SV_DispatchThreadID)
 {   
+    uint3 bas = uint3((int)base.x, (int)base.y, (int)base.z);
+
+    id += bas;
+
     // Stop one point before the end because voxel includes neighbouring points
     if (id.x >= numPointsX-1 || id.y >= numPointsY-1 || id.z >= numPointsZ-1) {
         return;
