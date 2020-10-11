@@ -61,3 +61,5 @@ crashlytics-build.properties
 Assets/Materials.meta
 Assets/Resources.meta
 Assets/Resources.meta
+Assets/Compute/Recoverer.compute.meta
+Assets/Compute/SphereDensity.compute.meta

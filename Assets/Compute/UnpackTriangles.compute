@@ -5,6 +5,7 @@ struct Triangle {
     float3 vertexC;
     float3 vertexB;
     float3 vertexA;
+    uint3 cubeID;
 };
 
 int triangleCount;
@@ -14,7 +15,7 @@ RWStructuredBuffer<float3> points;
 RWStructuredBuffer<Triangle> triangles;
 
 
-[numthreads(64,1,1)]
+[numthreads(256,1,1)]
 void UnpackTriangles (uint3 id : SV_DispatchThreadID)
 {
     if(id.x >= triangleCount) return;

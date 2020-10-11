@@ -7,6 +7,7 @@ struct Triangle {
     float3 vertexC;
     float3 vertexB;
     float3 vertexA;
+    uint3 cubeID;
 };
 
 AppendStructuredBuffer<Triangle> triangles;
@@ -28,7 +29,7 @@ int indexFromCoord(int x, int y, int z) {
 }
 
 [numthreads(numThreads,numThreads,numThreads)]
-void March (int3 id : SV_DispatchThreadID)
+void March (uint3 id : SV_DispatchThreadID)
 {   
     // Stop one point before the end because voxel includes neighbouring points
     if (id.x >= numPointsX-1 || id.y >= numPointsY-1 || id.z >= numPointsZ-1) {
@@ -78,6 +79,7 @@ void March (int3 id : SV_DispatchThreadID)
         tri.vertexA = interpolateVerts(cubeCorners[a0], cubeCorners[b0]);
         tri.vertexB = interpolateVerts(cubeCorners[a1], cubeCorners[b1]);
         tri.vertexC = interpolateVerts(cubeCorners[a2], cubeCorners[b2]);
+        tri.cubeID = id;
         triangles.Append(tri);
     }
 

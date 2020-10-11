@@ -1,0 +1,22 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Recover
+
+struct Triangle {
+    float3 vertexC;
+    float3 vertexB;
+    float3 vertexA;
+    uint3 cubeID;
+};
+
+AppendStructuredBuffer<Triangle> input;
+AppendStructuredBuffer<Triangle> output;
+
+int numTris;
+
+[numthreads(256,1,1)]
+void Recover (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x >= numTris) return;
+
+    
+}
