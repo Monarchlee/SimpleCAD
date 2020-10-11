@@ -7,7 +7,7 @@ struct Triangle {
     uint3 cubeID;
 };
 
-ConsumeStructuredBuffer<Triangle> input
+ConsumeStructuredBuffer<Triangle> input;
 AppendStructuredBuffer<Triangle> output;
 
 int numTris;

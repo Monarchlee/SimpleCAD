@@ -17,7 +17,7 @@ int indexFromCoord(int x, int y, int z) {
 }
 
 [numthreads(numThreads,numThreads,numThreads)]
-void ReadData (uint3 id : SV_DispatchThreadID)
+void ReadData (int3 id : SV_DispatchThreadID)
 {
     if (id.x >= numPointsX || id.y >= numPointsY || id.z >= numPointsZ) {
         return;
@@ -34,7 +34,7 @@ void ReadData (uint3 id : SV_DispatchThreadID)
 
 
 [numthreads(numThreads,numThreads,numThreads)]
-void WriteData (uint3 id : SV_DispatchThreadID)
+void WriteData (int3 id : SV_DispatchThreadID)
 {
     float3 pos = id * cellSize;
 

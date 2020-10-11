@@ -16,7 +16,7 @@ RWStructuredBuffer<Triangle> triangles;
 
 
 [numthreads(256,1,1)]
-void UnpackTriangles (uint3 id : SV_DispatchThreadID)
+void UnpackTriangles (int3 id : SV_DispatchThreadID)
 {
     if(id.x >= triangleCount) return;
 
