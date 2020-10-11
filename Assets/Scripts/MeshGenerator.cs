@@ -9,6 +9,7 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] ComputeShader march = null;
     [SerializeField] ComputeShader transfer = null;
     [SerializeField] ComputeShader unpacker = null;
+    [SerializeField] ComputeShader recoverer = null;
 
     float isoLevel = 0;
     #endregion

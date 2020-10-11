@@ -1,5 +1,4 @@
-﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel Recover
+﻿#pragma kernel Recover
 
 struct Triangle {
     float3 vertexC;
@@ -8,15 +7,22 @@ struct Triangle {
     uint3 cubeID;
 };
 
-AppendStructuredBuffer<Triangle> input;
+ConsumeStructuredBuffer<Triangle> input
 AppendStructuredBuffer<Triangle> output;
 
 int numTris;
 
+float3 cellSize;
+float3 center;
+float radius;
+
 [numthreads(256,1,1)]
 void Recover (uint3 id : SV_DispatchThreadID)
 {
-    if(id.x >= numTris) return;
+    if(id.x >= (uint)numTris) return;
 
-    
+    Triangle tri = input.Consume();
+    float3 delta = (tri.cubeID - center) * cellSize;
+    if(length(delta) <= radius) return;
+    output.Append(tri);
 }
