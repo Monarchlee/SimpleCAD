@@ -8,15 +8,14 @@ public class MeshGenerator : MonoBehaviour
     #region Properties
     [SerializeField] ComputeShader march = null;
     [SerializeField] ComputeShader transfer = null;
-    [SerializeField] Material mat = null;
+    [SerializeField] ComputeShader unpacker = null;
 
-    [SerializeField] float isoLevel = 0;
+    float isoLevel = 0;
     #endregion
 
     #region Buffers
     ComputeBuffer triangleBuffer;
     ComputeBuffer pointsBuffer;
-    ComputeBuffer triCountBuffer;
     #endregion
 
     #region Mesh
@@ -45,7 +44,6 @@ public class MeshGenerator : MonoBehaviour
 
     public void ReadData(Volume volume)
     {
-        triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
         pointsBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float) * 4);
         triangleBuffer = new ComputeBuffer(volume.VoxelCount * 5, sizeof(float) * 3 * 3, ComputeBufferType.Append);
 
@@ -70,7 +68,6 @@ public class MeshGenerator : MonoBehaviour
         Mesh mesh = new Mesh();
 
         Vector3Int threadCount = volume.VoxelThreadCount;
-
         triangleBuffer.SetCounterValue(0);
         march.SetBuffer(0, "points", pointsBuffer);
         march.SetBuffer(0, "triangles", triangleBuffer);
@@ -78,40 +75,16 @@ public class MeshGenerator : MonoBehaviour
         march.SetInt("numPointsY", volume.SamplesDensity.y);
         march.SetInt("numPointsZ", volume.SamplesDensity.z);
         march.SetFloat("isoLevel", isoLevel);
-
         march.Dispatch(0, threadCount.x, threadCount.y, threadCount.z);
 
-        int[] triCountArray = { 0 };
-        ComputeBuffer.CopyCount(triangleBuffer, triCountBuffer, 0);
-        triCountBuffer.GetData(triCountArray);
-        int numTris = triCountArray[0];
+        int numTris = GetNumTris(triangleBuffer);
 
-        Triangle[] tris = new Triangle[numTris];
-        triangleBuffer.GetData(tris, 0, 0, numTris);
-
-        Vector3[] vertices = new Vector3[numTris * 3];
         int[] triangles;
-
-        for (int i = 0; i < numTris; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                vertices[i * 3 + j] = tris[i][j];
-            }
-        }
-
+        Vector3[] vertices = UnpackTriangles(numTris);
         int vertexCount = CompressVertices(ref vertices, out triangles);
 
-        if(vertexCount >= 65536)
-        {
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        }
-        else
-        {
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
-        }
-
-        Debug.Log(vertexCount);
+        if(vertexCount >= 65536) mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;     
+        else mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
 
         mesh.vertices = vertices;
         mesh.triangles = triangles;
@@ -119,6 +92,30 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
 
         return mesh;
+    }
+
+    int GetNumTris(ComputeBuffer triangleBuffer)
+    {
+        int[] triCountArray = { 0 };
+        ComputeBuffer triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+        ComputeBuffer.CopyCount(triangleBuffer, triCountBuffer, 0);
+        triCountBuffer.GetData(triCountArray);
+        int numTris = triCountArray[0];
+        triCountBuffer.Dispose();
+        return numTris;
+    }
+
+    Vector3[] UnpackTriangles(int numTris)
+    {
+        Vector3[] vertices = new Vector3[numTris * 3];
+        ComputeBuffer verticeBuffer = new ComputeBuffer(numTris * 3, sizeof(float) * 3);
+        unpacker.SetInt("triangleCount", numTris);
+        unpacker.SetBuffer(0, "triangles", triangleBuffer);
+        unpacker.SetBuffer(0, "points", verticeBuffer);
+        unpacker.Dispatch(0, Mathf.CeilToInt(numTris / 64f), 1, 1);
+        verticeBuffer.GetData(vertices);
+        verticeBuffer.Dispose();
+        return vertices;
     }
 
     int CompressVertices(ref Vector3[] vertices, out int[] triangles)
@@ -149,7 +146,6 @@ public class MeshGenerator : MonoBehaviour
     {
         triangleBuffer.Dispose();
         pointsBuffer.Dispose();
-        triCountBuffer.Dispose();
     }
 
     public void SetMesh(Mesh mesh)
@@ -168,29 +164,6 @@ public class MeshGenerator : MonoBehaviour
         Mesh mesh = GenerateMesh(sphere);
         SetMesh(mesh);
         UnloadBuffer();
-
-        /*
-        using(System.IO.FileStream fs = new System.IO.FileStream("D:/Vertices.txt",System.IO.FileMode.OpenOrCreate))
-        {
-            System.IO.StreamWriter sw = new System.IO.StreamWriter(fs);
-            string str = "";
-
-            for (int i = 0; i < mesh.vertices.Length; i++)
-            {
-                str = mesh.triangles[i] + ":" + mesh.vertices[i] + "\n";
-                sw.Write(str);
-                sw.Flush();
-                if (i % 200 == 0)
-                {
-                    Debug.Log("Flash:" + i / 200);
-                    yield return 0;
-                }
-            }
-
-            sw.Close();
-            fs.Close();
-        }
-        */
     }
 
 }

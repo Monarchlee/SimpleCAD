@@ -1,0 +1,27 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel UnpackTriangles
+
+struct Triangle {
+    float3 vertexC;
+    float3 vertexB;
+    float3 vertexA;
+};
+
+int triangleCount;
+
+RWStructuredBuffer<float3> points;
+
+RWStructuredBuffer<Triangle> triangles;
+
+
+[numthreads(64,1,1)]
+void UnpackTriangles (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x >= triangleCount) return;
+
+    Triangle tri = triangles[id.x];
+    
+    points[id.x * 3] = tri.vertexC;
+    points[id.x * 3 + 1] = tri.vertexB;
+    points[id.x * 3 + 2] = tri.vertexA;
+}
