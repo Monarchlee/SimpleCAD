@@ -26,25 +26,21 @@ public class Mouse : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(MouseView.state!=0)
+        Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+        if (cursor.activeSelf == false)
+            cursor.SetActive(true);
+        if (Physics.Raycast(ray, out RaycastHit hit))//击中mesh
         {
-            Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
-            if (cursor.activeSelf == false)
-                cursor.SetActive(true);
-            if (Physics.Raycast(ray, out RaycastHit hit))//击中mesh
+            position = hit.point;
+            cursor.transform.position = position;
+            cursor.transform.LookAt(position + hit.normal);
+            if (Input.GetMouseButton(0))
             {
-                position = hit.point;
-                cursor.transform.position = position;
-                cursor.transform.LookAt(position + hit.normal);
-                if (Input.GetMouseButtonDown(0))
-                {
-                    //修改密度值
-                    generator.CleanTriangles(hit.point, 1f);
-                    Mesh mesh = generator.GenerateMesh();
-                    generator.SetMesh(mesh);
-                }
+                //修改密度值
+                generator.CleanTriangles(hit.point, 1f);
+                Mesh mesh = generator.GenerateMesh();
+                generator.SetMesh(mesh);
             }
         }
-
     }
 }

@@ -34,8 +34,10 @@ public class MeshGenerator : MonoBehaviour
     #endregion
 
     #region Operation
-    public void InitBuffers()
+    public void InitBuffers(Volume volume)
     {
+        this.volume = volume;
+
         pointsBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float) * 4);
         triangleBufferA = new ComputeBuffer(volume.VoxelCount * 5, sizeof(float) * 3 * 3, ComputeBufferType.Append);
         triangleBufferB = new ComputeBuffer(volume.VoxelCount * 5, sizeof(float) * 3 * 3, ComputeBufferType.Append);
@@ -106,15 +108,18 @@ public class MeshGenerator : MonoBehaviour
     {
         Vector3 objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
         Vector3 centerID = new Vector3(objectCenter.x / volume.VoxelSize.x, objectCenter.y / volume.VoxelSize.y, objectCenter.z / volume.VoxelSize.z);
+        Vector3 voxelRange = new Vector3(
+            Mathf.CeilToInt(radius / volume.VoxelSize.x - 0.5f),
+            Mathf.CeilToInt(radius / volume.VoxelSize.y - 0.5f),
+            Mathf.CeilToInt(radius / volume.VoxelSize.z - 0.5f));
 
         frontBuffer.SetCounterValue((uint)numTris);
         backBuffer.SetCounterValue(0);
         recoverer.SetBuffer(0, "input", frontBuffer);
         recoverer.SetBuffer(0, "output", backBuffer);
         recoverer.SetInt("numTris", numTris);
-        recoverer.SetVector("cellSize", volume.VoxelSize);
+        recoverer.SetVector("voxelRange", voxelRange);
         recoverer.SetVector("centerID", centerID);
-        recoverer.SetFloat("radius", radius + volume.VoxelSize.sqrMagnitude);
 
         recoverer.Dispatch(0, Mathf.CeilToInt(numTris / 256f), 1, 1);
 
@@ -163,10 +168,10 @@ public class MeshGenerator : MonoBehaviour
         filter = GetComponent<MeshFilter>();
         collider = GetComponent<MeshCollider>();
 
-        Volume shpere = new Volume();
+        Volume sphere = new Volume();
 
-        InitBuffers();
-        ReadData(shpere);
+        InitBuffers(sphere);
+        ReadData(sphere);
         MarchAll();
         Mesh mesh = GenerateMesh();
         SetMesh(mesh);
