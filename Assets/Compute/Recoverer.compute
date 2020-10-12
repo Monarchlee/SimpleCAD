@@ -13,7 +13,7 @@ AppendStructuredBuffer<Triangle> output;
 int numTris;
 
 float3 cellSize;
-float3 center;
+float3 centerID;
 float radius;
 
 [numthreads(256,1,1)]
@@ -22,7 +22,7 @@ void Recover (uint3 id : SV_DispatchThreadID)
     if(id.x >= (uint)numTris) return;
 
     Triangle tri = input.Consume();
-    float3 delta = (tri.cubeID - center) * cellSize;
+    float3 delta = (tri.cubeID - centerID) * cellSize;
     if(length(delta) <= radius) return;
     output.Append(tri);
 }
