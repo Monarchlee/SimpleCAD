@@ -11,7 +11,7 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] ComputeShader unpacker = null;
     [SerializeField] ComputeShader recoverer = null;
 
-    float isoLevel = 0;
+    readonly float isoLevel = 0;
     #endregion
 
     #region Buffers
@@ -29,6 +29,7 @@ public class MeshGenerator : MonoBehaviour
     new MeshCollider collider = null;
     #endregion
 
+    #region Operation
     public void InitBuffers(Volume volume)
     {
         pointsBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float) * 4);
@@ -96,9 +97,8 @@ public class MeshGenerator : MonoBehaviour
 
         int numTris = GetNumTris(frontBuffer);
 
-        int[] triangles;
         Vector3[] vertices = UnpackTriangles(frontBuffer, numTris);
-        int vertexCount = CompressVertices(ref vertices, out triangles);
+        int vertexCount = CompressVertices(ref vertices, out int[] triangles);
 
         if(vertexCount >= 65536) mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;     
         else mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
@@ -128,7 +128,9 @@ public class MeshGenerator : MonoBehaviour
         filter.mesh = mesh;
         collider.sharedMesh = mesh;
     }
+    #endregion
 
+    #region Lifetime
     private void Start()
     {
         filter = GetComponent<MeshFilter>();
@@ -141,6 +143,7 @@ public class MeshGenerator : MonoBehaviour
         SetMesh(mesh);
         UnloadBuffer();
     }
+    #endregion
 
     #region Method
     Vector3[] UnpackTriangles(ComputeBuffer triangleBuffer, int numTris)
@@ -189,6 +192,13 @@ public class MeshGenerator : MonoBehaviour
         vertices = vertexs.ToArray();
 
         return hash.Count;
+    }
+
+    void SwitchTriangleBuffers()
+    {
+        ComputeBuffer temp = frontBuffer;
+        frontBuffer = backBuffer;
+        backBuffer = temp;
     }
     #endregion
 }
