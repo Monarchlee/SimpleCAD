@@ -15,7 +15,12 @@ public class MeshGenerator : MonoBehaviour
     #endregion
 
     #region Buffers
-    ComputeBuffer triangleBuffer;
+    ComputeBuffer triangleBufferA;
+    ComputeBuffer triangleBufferB;
+
+    ComputeBuffer frontBuffer;
+    ComputeBuffer backBuffer;
+
     ComputeBuffer pointsBuffer;
     #endregion
 
@@ -23,6 +28,19 @@ public class MeshGenerator : MonoBehaviour
     MeshFilter filter = null;
     new MeshCollider collider = null;
     #endregion
+
+    public void InitBuffers(Volume volume)
+    {
+        pointsBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float) * 4);
+        triangleBufferA = new ComputeBuffer(volume.VoxelCount * 5, sizeof(float) * 3 * 3, ComputeBufferType.Append);
+        triangleBufferB = new ComputeBuffer(volume.VoxelCount * 5, sizeof(float) * 3 * 3, ComputeBufferType.Append);
+
+        frontBuffer = triangleBufferA;
+        backBuffer = triangleBufferB;
+
+        frontBuffer.SetCounterValue(0);
+        backBuffer.SetCounterValue(0);
+    }
 
     public void WriteData(Volume volume)
     {
@@ -45,9 +63,6 @@ public class MeshGenerator : MonoBehaviour
 
     public void ReadData(Volume volume)
     {
-        pointsBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float) * 4);
-        triangleBuffer = new ComputeBuffer(volume.VoxelCount * 5, sizeof(float) * 3 * 3, ComputeBufferType.Append);
-
         Vector3Int threadCount = volume.SamplesThreadCount;
 
         ComputeBuffer dataBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float));
@@ -69,9 +84,9 @@ public class MeshGenerator : MonoBehaviour
         Mesh mesh = new Mesh();
 
         Vector3Int threadCount = volume.VoxelThreadCount;
-        triangleBuffer.SetCounterValue(0);
+        frontBuffer.SetCounterValue(0);
         march.SetBuffer(0, "points", pointsBuffer);
-        march.SetBuffer(0, "triangles", triangleBuffer);
+        march.SetBuffer(0, "triangles", frontBuffer);
         march.SetVector("base", Vector4.zero);
         march.SetInt("numPointsX", volume.SamplesDensity.x);
         march.SetInt("numPointsY", volume.SamplesDensity.y);
@@ -79,10 +94,10 @@ public class MeshGenerator : MonoBehaviour
         march.SetFloat("isoLevel", isoLevel);
         march.Dispatch(0, threadCount.x, threadCount.y, threadCount.z);
 
-        int numTris = GetNumTris(triangleBuffer);
+        int numTris = GetNumTris(frontBuffer);
 
         int[] triangles;
-        Vector3[] vertices = UnpackTriangles(numTris);
+        Vector3[] vertices = UnpackTriangles(frontBuffer, numTris);
         int vertexCount = CompressVertices(ref vertices, out triangles);
 
         if(vertexCount >= 65536) mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;     
@@ -96,57 +111,15 @@ public class MeshGenerator : MonoBehaviour
         return mesh;
     }
 
-    int GetNumTris(ComputeBuffer triangleBuffer)
+    public void RegenerateMesh(Volume volume, Vector3 center, float radius)
     {
-        int[] triCountArray = { 0 };
-        ComputeBuffer triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
-        ComputeBuffer.CopyCount(triangleBuffer, triCountBuffer, 0);
-        triCountBuffer.GetData(triCountArray);
-        int numTris = triCountArray[0];
-        triCountBuffer.Dispose();
-        return numTris;
-    }
 
-    Vector3[] UnpackTriangles(int numTris)
-    {
-        Vector3[] vertices = new Vector3[numTris * 3];
-        ComputeBuffer verticeBuffer = new ComputeBuffer(numTris * 3, sizeof(float) * 3);
-        unpacker.SetInt("triangleCount", numTris);
-        unpacker.SetBuffer(0, "triangles", triangleBuffer);
-        unpacker.SetBuffer(0, "points", verticeBuffer);
-        unpacker.Dispatch(0, Mathf.CeilToInt(numTris / 64f), 1, 1);
-        verticeBuffer.GetData(vertices);
-        verticeBuffer.Dispose();
-        return vertices;
-    }
-
-    int CompressVertices(ref Vector3[] vertices, out int[] triangles)
-    {
-        Dictionary<Vector3, int> hash = new Dictionary<Vector3, int>();
-        int index = 0;
-
-        triangles = new int[vertices.Length];
-        List<Vector3> vertexs = new List<Vector3>();
-
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            if(!hash.ContainsKey(vertices[i]))
-            {
-                hash.Add(vertices[i], index);
-                vertexs.Add(vertices[i]);
-                index++;
-            }
-            triangles[i] = hash[vertices[i]];
-        }
-
-        vertices = vertexs.ToArray();
-
-        return hash.Count;
     }
 
     public void UnloadBuffer()
     {
-        triangleBuffer.Dispose();
+        triangleBufferA.Dispose();
+        triangleBufferB.Dispose();
         pointsBuffer.Dispose();
     }
 
@@ -162,10 +135,60 @@ public class MeshGenerator : MonoBehaviour
         collider = GetComponent<MeshCollider>();
 
         Volume sphere = new Volume();
+        InitBuffers(sphere);
         ReadData(sphere);
         Mesh mesh = GenerateMesh(sphere);
         SetMesh(mesh);
         UnloadBuffer();
     }
 
+    #region Method
+    Vector3[] UnpackTriangles(ComputeBuffer triangleBuffer, int numTris)
+    {
+        Vector3[] vertices = new Vector3[numTris * 3];
+        ComputeBuffer verticeBuffer = new ComputeBuffer(numTris * 3, sizeof(float) * 3);
+        unpacker.SetInt("triangleCount", numTris);
+        unpacker.SetBuffer(0, "triangles", triangleBuffer);
+        unpacker.SetBuffer(0, "points", verticeBuffer);
+        unpacker.Dispatch(0, Mathf.CeilToInt(numTris / 64f), 1, 1);
+        verticeBuffer.GetData(vertices);
+        verticeBuffer.Dispose();
+        return vertices;
+    }
+
+    int GetNumTris(ComputeBuffer triangleBuffer)
+    {
+        int[] triCountArray = { 0 };
+        ComputeBuffer triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+        ComputeBuffer.CopyCount(triangleBuffer, triCountBuffer, 0);
+        triCountBuffer.GetData(triCountArray);
+        int numTris = triCountArray[0];
+        triCountBuffer.Dispose();
+        return numTris;
+    }
+
+    int CompressVertices(ref Vector3[] vertices, out int[] triangles)
+    {
+        Dictionary<Vector3, int> hash = new Dictionary<Vector3, int>();
+        int index = 0;
+
+        triangles = new int[vertices.Length];
+        List<Vector3> vertexs = new List<Vector3>();
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            if (!hash.ContainsKey(vertices[i]))
+            {
+                hash.Add(vertices[i], index);
+                vertexs.Add(vertices[i]);
+                index++;
+            }
+            triangles[i] = hash[vertices[i]];
+        }
+
+        vertices = vertexs.ToArray();
+
+        return hash.Count;
+    }
+    #endregion
 }
