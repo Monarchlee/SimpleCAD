@@ -11,6 +11,8 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] ComputeShader unpacker = null;
     [SerializeField] ComputeShader recoverer = null;
 
+    Volume volume;
+
     readonly float isoLevel = 0;
     #endregion
 
@@ -32,7 +34,7 @@ public class MeshGenerator : MonoBehaviour
     #endregion
 
     #region Operation
-    public void InitBuffers(Volume volume)
+    public void InitBuffers()
     {
         pointsBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float) * 4);
         triangleBufferA = new ComputeBuffer(volume.VoxelCount * 5, sizeof(float) * 3 * 3, ComputeBufferType.Append);
@@ -66,6 +68,8 @@ public class MeshGenerator : MonoBehaviour
 
     public void ReadData(Volume volume)
     {
+        this.volume = volume;
+
         Vector3Int threadCount = volume.SamplesThreadCount;
 
         ComputeBuffer dataBuffer = new ComputeBuffer(volume.SamplesCount, sizeof(float));
@@ -82,7 +86,7 @@ public class MeshGenerator : MonoBehaviour
         dataBuffer.Dispose();
     }
 
-    public void MarchAll(Volume volume)
+    public void MarchAll()
     {
         Vector3Int threadCount = volume.VoxelThreadCount;
         frontBuffer.SetCounterValue(0);
@@ -98,7 +102,7 @@ public class MeshGenerator : MonoBehaviour
         numTris = GetNumTris(frontBuffer);
     }
 
-    public void CleanTriangles(Volume volume, Vector3 center, float radius)
+    public void CleanTriangles(Vector3 center, float radius)
     {
         Vector3 objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
         Vector3 centerID = new Vector3(objectCenter.x / volume.VoxelSize.x, objectCenter.y / volume.VoxelSize.y, objectCenter.z / volume.VoxelSize.z);
@@ -112,14 +116,14 @@ public class MeshGenerator : MonoBehaviour
         recoverer.SetVector("centerID", centerID);
         recoverer.SetFloat("radius", radius + volume.VoxelSize.sqrMagnitude);
 
-        recoverer.Dispatch(0, Mathf.CeilToInt(numTris / 256f), 0, 0);
+        recoverer.Dispatch(0, Mathf.CeilToInt(numTris / 256f), 1, 1);
 
         numTris = GetNumTris(backBuffer);
 
         SwitchTriangleBuffers();
     }
 
-    public Mesh GenerateMesh(Volume volume)
+    public Mesh GenerateMesh()
     {
         Mesh mesh = new Mesh();
 
@@ -159,13 +163,14 @@ public class MeshGenerator : MonoBehaviour
         filter = GetComponent<MeshFilter>();
         collider = GetComponent<MeshCollider>();
 
-        Volume sphere = new Volume();
-        InitBuffers(sphere);
-        ReadData(sphere);
-        MarchAll(sphere);
-        Mesh mesh = GenerateMesh(sphere);
+        Volume shpere = new Volume();
+
+        InitBuffers();
+        ReadData(shpere);
+        MarchAll();
+        Mesh mesh = GenerateMesh();
         SetMesh(mesh);
-        UnloadBuffer();
+        //UnloadBuffer();
     }
     #endregion
 
@@ -173,6 +178,7 @@ public class MeshGenerator : MonoBehaviour
     Vector3[] UnpackTriangles(ComputeBuffer triangleBuffer, int numTris)
     {
         Vector3[] vertices = new Vector3[numTris * 3];
+        if (numTris == 0) throw new System.Exception("The numTris input is 0.");
         ComputeBuffer verticeBuffer = new ComputeBuffer(numTris * 3, sizeof(float) * 3);
         unpacker.SetInt("triangleCount", numTris);
         unpacker.SetBuffer(0, "triangles", triangleBuffer);
