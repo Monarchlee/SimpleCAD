@@ -105,16 +105,18 @@ public class MeshGenerator : MonoBehaviour
         numTris = GetNumTris(frontBuffer);
     }
 
-
-    public void CleanTriangles(Vector3 center, float radius)
+    public void GetCubeIDs(Vector3 center, float radius, out Vector3 centerID, out Vector3 voxelRange)
     {
         Vector3 objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
-        Vector3 centerID = new Vector3(objectCenter.x / volume.VoxelSize.x, objectCenter.y / volume.VoxelSize.y, objectCenter.z / volume.VoxelSize.z);
-        Vector3 voxelRange = new Vector3(
+        centerID = new Vector3(objectCenter.x / volume.VoxelSize.x, objectCenter.y / volume.VoxelSize.y, objectCenter.z / volume.VoxelSize.z);
+        voxelRange = new Vector3(
             Mathf.CeilToInt(radius / volume.VoxelSize.x - 0.5f),
             Mathf.CeilToInt(radius / volume.VoxelSize.y - 0.5f),
             Mathf.CeilToInt(radius / volume.VoxelSize.z - 0.5f));
+    }
 
+    public void CleanTriangles(Vector3 centerID, Vector3 voxelRange)
+    {
         frontBuffer.SetCounterValue((uint)numTris);
         backBuffer.SetCounterValue(0);
         recoverer.SetBuffer(0, "input", frontBuffer);
@@ -131,15 +133,8 @@ public class MeshGenerator : MonoBehaviour
         SwitchTriangleBuffers();
     }
 
-    public void Remarch(Vector3 center, float radius)
+    public void Remarch(Vector3 centerID, Vector3 voxelRange)
     {
-        Vector3 objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
-        Vector3 centerID = new Vector3(objectCenter.x / volume.VoxelSize.x, objectCenter.y / volume.VoxelSize.y, objectCenter.z / volume.VoxelSize.z);
-        Vector3 voxelRange = new Vector3(
-            Mathf.CeilToInt(radius / volume.VoxelSize.x - 0.5f),
-            Mathf.CeilToInt(radius / volume.VoxelSize.y - 0.5f),
-            Mathf.CeilToInt(radius / volume.VoxelSize.z - 0.5f));
-
         Vector3 baseID = centerID - voxelRange + Vector3.one;
         Vector3 voxelCount = voxelRange * 2;
 
