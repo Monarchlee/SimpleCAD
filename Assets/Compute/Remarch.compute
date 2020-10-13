@@ -14,6 +14,7 @@ AppendStructuredBuffer<Triangle> triangles;
 RWStructuredBuffer<float4> points;
 
 float3 base;
+float3 voxelCount;
 
 int numPointsX;
 int numPointsY;
@@ -35,28 +36,25 @@ void March (int3 id : SV_DispatchThreadID)
 {   
     int3 bas = int3((int)base.x, (int)base.y, (int)base.z);
 
-    // Stop one point before the end because voxel includes neighbouring points
-    if (id.x >= numPointsX-1 || id.y >= numPointsY-1 || id.z >= numPointsZ-1) {
-        return;
-    }
-
-    id += bas;
+    float3 cid = id + bas;
+    if (cid.x >= numPointsX-1 || cid.y >= numPointsY-1 || cid.z >= numPointsZ-1) return;
+    if( id.x >= voxelCount.x || id.y >= voxelCount.y || id.z >= voxelCount.z) return;
 
     // 8 corners of the current cube
     float4 cubeCorners[8] = {
-        points[indexFromCoord(id.x, id.y, id.z)],
-        points[indexFromCoord(id.x + 1, id.y, id.z)],
-        points[indexFromCoord(id.x + 1, id.y, id.z + 1)],
-        points[indexFromCoord(id.x, id.y, id.z + 1)],
-        points[indexFromCoord(id.x, id.y + 1, id.z)],
-        points[indexFromCoord(id.x + 1, id.y + 1, id.z)],
-        points[indexFromCoord(id.x + 1, id.y + 1, id.z + 1)],
-        points[indexFromCoord(id.x, id.y + 1, id.z + 1)]
+        points[indexFromCoord(cid.x, cid.y, cid.z)],
+        points[indexFromCoord(cid.x + 1, cid.y, cid.z)],
+        points[indexFromCoord(cid.x + 1, cid.y, cid.z + 1)],
+        points[indexFromCoord(cid.x, cid.y, cid.z + 1)],
+        points[indexFromCoord(cid.x, cid.y + 1, cid.z)],
+        points[indexFromCoord(cid.x + 1, cid.y + 1, cid.z)],
+        points[indexFromCoord(cid.x + 1, cid.y + 1, cid.z + 1)],
+        points[indexFromCoord(cid.x, cid.y + 1, cid.z + 1)]
     };
 
     // Calculate unique index for each cube configuration.
     // There are 256 possible values
-    // A value of 0 means cube is entirely inside surface; 255 entirely outside.
+    // A value of 0 means cube is entirely inscide surface; 255 entirely outscide.
     // The value is used to look up the edge table, which indicates which edges of the cube are cut by the isosurface.
     int cubeIndex = 0;
     if (cubeCorners[0].w < isoLevel) cubeIndex |= 1;
@@ -85,7 +83,7 @@ void March (int3 id : SV_DispatchThreadID)
         tri.vertexA = interpolateVerts(cubeCorners[a0], cubeCorners[b0]);
         tri.vertexB = interpolateVerts(cubeCorners[a1], cubeCorners[b1]);
         tri.vertexC = interpolateVerts(cubeCorners[a2], cubeCorners[b2]);
-        tri.cubeID = id;
+        tri.cubeID = cid;
         triangles.Append(tri);
     }
 

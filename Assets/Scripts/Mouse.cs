@@ -37,7 +37,13 @@ public class Mouse : MonoBehaviour
             if (Input.GetMouseButton(0))
             {
                 //修改密度值
-                generator.CleanTriangles(hit.point, 1f);
+                /*
+                generator.CalculateBox(hit.point, 1f, out Vector3 centerID, out Vector3 voxelRange);
+                generator.CleanTriangles(centerID, voxelRange);
+                generator.Remarch(centerID, voxelRange);
+                */
+                generator.CleanTriangles(hit.point, 1);
+                generator.Remarch(hit.point, 1);
                 Mesh mesh = generator.GenerateMesh();
                 generator.SetMesh(mesh);
             }

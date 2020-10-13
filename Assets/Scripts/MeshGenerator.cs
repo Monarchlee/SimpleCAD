@@ -10,6 +10,7 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] ComputeShader transfer = null;
     [SerializeField] ComputeShader unpacker = null;
     [SerializeField] ComputeShader recoverer = null;
+    [SerializeField] ComputeShader remarch = null;
 
     Volume volume;
 
@@ -104,6 +105,7 @@ public class MeshGenerator : MonoBehaviour
         numTris = GetNumTris(frontBuffer);
     }
 
+
     public void CleanTriangles(Vector3 center, float radius)
     {
         Vector3 objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
@@ -124,8 +126,40 @@ public class MeshGenerator : MonoBehaviour
         recoverer.Dispatch(0, Mathf.CeilToInt(numTris / 256f), 1, 1);
 
         numTris = GetNumTris(backBuffer);
+        Debug.Log("Clear " + numTris + "(Remain)");
 
         SwitchTriangleBuffers();
+    }
+
+    public void Remarch(Vector3 center, float radius)
+    {
+        Vector3 objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
+        Vector3 centerID = new Vector3(objectCenter.x / volume.VoxelSize.x, objectCenter.y / volume.VoxelSize.y, objectCenter.z / volume.VoxelSize.z);
+        Vector3 voxelRange = new Vector3(
+            Mathf.CeilToInt(radius / volume.VoxelSize.x - 0.5f),
+            Mathf.CeilToInt(radius / volume.VoxelSize.y - 0.5f),
+            Mathf.CeilToInt(radius / volume.VoxelSize.z - 0.5f));
+
+        Vector3 baseID = centerID - voxelRange + Vector3.one;
+        Vector3 voxelCount = voxelRange * 2;
+
+        Vector3Int threadCount = new Vector3Int(
+            Mathf.CeilToInt(voxelCount.x / 8),
+            Mathf.CeilToInt(voxelCount.y / 8),
+            Mathf.CeilToInt(voxelCount.z / 8));
+
+        remarch.SetBuffer(0, "points", pointsBuffer);
+        remarch.SetBuffer(0, "triangles", frontBuffer);
+        remarch.SetVector("base", baseID);
+        remarch.SetVector("voxelCount", voxelCount);
+        remarch.SetInt("numPointsX", volume.SamplesDensity.x);
+        remarch.SetInt("numPointsY", volume.SamplesDensity.y);
+        remarch.SetInt("numPointsZ", volume.SamplesDensity.z);
+        remarch.SetFloat("isoLevel", isoLevel);
+        remarch.Dispatch(0, threadCount.x, threadCount.y, threadCount.z);
+
+        numTris = GetNumTris(frontBuffer);
+        Debug.Log("Remarch " + GetNumTris(frontBuffer) + "(front) :" + GetNumTris(backBuffer) + "(back)"); 
     }
 
     public Mesh GenerateMesh()
