@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 414056358}
   - component: {fileID: 414056359}
   m_Layer: 0
-  m_Name: March
+  m_Name: MeshRenderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -157,6 +157,7 @@ MonoBehaviour:
   transfer: {fileID: 7200000, guid: b94971c2e711f784e8d8466126841bf6, type: 3}
   unpacker: {fileID: 7200000, guid: 85245a896882848439904f031af78ee4, type: 3}
   recoverer: {fileID: 7200000, guid: da1a311847ffe304693013a2bee5d927, type: 3}
+  modifier: {fileID: 7200000, guid: 29a5386344fe81a4fb5efe01c20d6ff8, type: 3}
   remarch: {fileID: 7200000, guid: d6ba9ded395a2704fa53675463b083cd, type: 3}
 --- !u!64 &414056359
 MeshCollider:
@@ -423,10 +424,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e76a6c854d7997b4a87f096927d9402c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Camera: {fileID: 963194227}
   size: {x: 0.5, y: 0.5, z: 0.5}
   cursor: {fileID: 2222737571690788918, guid: 24445b3be998a2f43b5d8321c823f9fb, type: 3}
   generator: {fileID: 414056358}
+  radius: 4
+  strength: 50
+  damping: 0.1
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -439,10 +442,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ab33f9866e447a48b7620c4cfa837c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotateSpeed: 15
+  rotateSpeed: 6
   moveSpeed: 2
   scrollSpeed: 10
-  dragSpeed: 10
+  dragSpeed: 6
 --- !u!1 &1311820964
 GameObject:
   m_ObjectHideFlags: 0

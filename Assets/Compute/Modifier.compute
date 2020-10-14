@@ -1,0 +1,48 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Modify
+
+static const int numThreads = 8;
+
+float3 base;
+float3 voxelCount;
+float3 center;
+float radius;
+
+float strength;
+float damping;
+
+int numPointsX;
+int numPointsY;
+int numPointsZ;
+
+RWStructuredBuffer<float4> points;
+
+int indexFromCoord(int x, int y, int z) {
+    return y * numPointsY * numPointsX + x * numPointsX + z;
+}
+
+[numthreads(numThreads,numThreads,numThreads)]
+void Modify (uint3 id : SV_DispatchThreadID)
+{
+    int3 bas = int3((int)base.x, (int)base.y, (int)base.z);
+
+    float3 cid = id + bas + float3(1,1,1);
+    if (cid.x >= numPointsX-1 || cid.y >= numPointsY-1 || cid.z >= numPointsZ-1) return;
+    if( id.x >= voxelCount.x-1 || id.y >= voxelCount.y-1 || id.z >= voxelCount.z-1) return;
+
+    int index = indexFromCoord(cid.x, cid.y, cid.z);
+
+    float3 pos = points[index].xyz;
+    float value = points[index].w;
+
+    float dis = length(pos - center);
+    float weight = clamp(dis / radius,0,1);
+
+    //if(dis > radius) return;
+
+    float delta = lerp(strength, strength * (1 - damping), weight);
+
+    value = clamp(value + delta, -256, 256);
+
+    points[index].w = value;
+}

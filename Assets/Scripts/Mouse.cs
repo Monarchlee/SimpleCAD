@@ -5,22 +5,24 @@ using UnityEngine.UIElements;
 
 public class Mouse : MonoBehaviour
 {
-    public Camera m_Camera;
+    Camera m_Camera = null;
     public Vector3 size = new Vector3(0.5f, 0.5f, 0.5f);
-    //public GameObject sphere;
     private Vector3 position = new Vector3(0, 0, 0);
-    [SerializeField] GameObject cursor;
-    [SerializeField] MeshGenerator generator;
+    [SerializeField] GameObject cursor = null;
+    [SerializeField] MeshGenerator generator = null;
 
+    [SerializeField] float radius = 1;
+    [SerializeField] float strength = 1;
+    [SerializeField] float damping = 0;
 
     // Start is called before the first frame update
     void Start()
     {
+        m_Camera = Camera.main;
         cursor = Instantiate(cursor);
         cursor.transform.localScale = size;
         cursor.transform.position = position;
         cursor.SetActive(false);
-
     }
 
     // Update is called once per frame
@@ -36,11 +38,11 @@ public class Mouse : MonoBehaviour
             cursor.transform.LookAt(position + hit.normal);
             if (Input.GetMouseButton(0))
             {
-                //修改密度值
-                
-                generator.GetCubeIDs(hit.point, 1f, out Vector3 centerID, out Vector3 voxelRange);
+                //修改密度值       
+                generator.GetCubeIDs(hit.point, radius, out Vector3 objectCenter, out Vector3 centerID, out Vector3 voxelRange, out Vector3 baseID, out Vector3 voxelCount, out Vector3Int threadCount);
                 generator.CleanTriangles(centerID, voxelRange);
-                generator.Remarch(centerID, voxelRange);
+                generator.Modify(baseID, voxelCount, threadCount, objectCenter, radius, strength, damping);
+                generator.Remarch(baseID, voxelCount, threadCount);
                 Mesh mesh = generator.GenerateMesh();
                 generator.SetMesh(mesh);
             }

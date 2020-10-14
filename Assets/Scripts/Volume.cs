@@ -60,7 +60,7 @@ namespace VolumeData
                     for(int k = 0; k < SamplesDensity.z; k++)
                     {
                         Vector3Int v = new Vector3Int(i, j, k);
-                        this[v] = 900 - (v - center).sqrMagnitude;
+                        this[v] = 500 - (v - center).sqrMagnitude;
                     }
                 }
             }

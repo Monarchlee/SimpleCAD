@@ -10,6 +10,7 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] ComputeShader transfer = null;
     [SerializeField] ComputeShader unpacker = null;
     [SerializeField] ComputeShader recoverer = null;
+    [SerializeField] ComputeShader modifier = null;
     [SerializeField] ComputeShader remarch = null;
 
     Volume volume;
@@ -65,7 +66,6 @@ public class MeshGenerator : MonoBehaviour
         transfer.Dispatch(1, threadCount.x, threadCount.y, threadCount.z);
 
         dataBuffer.GetData(volume.data);
-        //理论上,pointsBuffer中的数据转移到了volume中
         dataBuffer.Dispose();
     }
 
@@ -105,14 +105,21 @@ public class MeshGenerator : MonoBehaviour
         numTris = GetNumTris(frontBuffer);
     }
 
-    public void GetCubeIDs(Vector3 center, float radius, out Vector3 centerID, out Vector3 voxelRange)
+    public void GetCubeIDs(Vector3 center, float radius, out Vector3 objectCenter, out Vector3 centerID, out Vector3 voxelRange, out Vector3 baseID, out Vector3 voxelCount, out Vector3Int threadCount)
     {
-        Vector3 objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
+        objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
         centerID = new Vector3(objectCenter.x / volume.VoxelSize.x, objectCenter.y / volume.VoxelSize.y, objectCenter.z / volume.VoxelSize.z);
         voxelRange = new Vector3(
             Mathf.CeilToInt(radius / volume.VoxelSize.x - 0.5f),
             Mathf.CeilToInt(radius / volume.VoxelSize.y - 0.5f),
             Mathf.CeilToInt(radius / volume.VoxelSize.z - 0.5f));
+
+        baseID = centerID - voxelRange + Vector3.one;
+        voxelCount = voxelRange * 2;
+        threadCount = new Vector3Int(
+            Mathf.CeilToInt(voxelCount.x / 8),
+            Mathf.CeilToInt(voxelCount.y / 8),
+            Mathf.CeilToInt(voxelCount.z / 8));
     }
 
     public void CleanTriangles(Vector3 centerID, Vector3 voxelRange)
@@ -133,16 +140,24 @@ public class MeshGenerator : MonoBehaviour
         SwitchTriangleBuffers();
     }
 
-    public void Remarch(Vector3 centerID, Vector3 voxelRange)
+    public void Modify(Vector3 baseID, Vector3 voxelCount, Vector3Int threadCount, Vector3 center, float range, float strength, float damping)
     {
-        Vector3 baseID = centerID - voxelRange + Vector3.one;
-        Vector3 voxelCount = voxelRange * 2;
+        modifier.SetBuffer(0, "points", pointsBuffer);
+        modifier.SetVector("base", baseID);
+        modifier.SetVector("voxelCount", voxelCount);
+        modifier.SetVector("center", center);
+        modifier.SetFloat("radius", range);
+        modifier.SetFloat("strength", strength);
+        modifier.SetFloat("damping", damping);
+        modifier.SetInt("numPointsX", volume.SamplesDensity.x);
+        modifier.SetInt("numPointsY", volume.SamplesDensity.y);
+        modifier.SetInt("numPointsZ", volume.SamplesDensity.z);
 
-        Vector3Int threadCount = new Vector3Int(
-            Mathf.CeilToInt(voxelCount.x / 8),
-            Mathf.CeilToInt(voxelCount.y / 8),
-            Mathf.CeilToInt(voxelCount.z / 8));
+        modifier.Dispatch(0, threadCount.x, threadCount.y, threadCount.z);
+    }
 
+    public void Remarch(Vector3 baseID, Vector3 voxelCount, Vector3Int threadCount)
+    {
         remarch.SetBuffer(0, "points", pointsBuffer);
         remarch.SetBuffer(0, "triangles", frontBuffer);
         remarch.SetVector("base", baseID);
