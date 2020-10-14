@@ -19,6 +19,7 @@ public class Mouse : MonoBehaviour
     void Start()
     {
         m_Camera = Camera.main;
+        m_Camera.depthTextureMode = DepthTextureMode.None;
         cursor = Instantiate(cursor);
         cursor.transform.localScale = size;
         cursor.transform.position = position;

@@ -35,14 +35,15 @@ void Modify (uint3 id : SV_DispatchThreadID)
     float3 pos = points[index].xyz;
     float value = points[index].w;
 
-    float dis = length(pos - center);
+    float dis = clamp(length(pos - center), 0, radius);
     float weight = clamp(dis / radius,0,1);
 
     //if(dis > radius) return;
 
     float delta = lerp(strength, strength * (1 - damping), weight);
 
-    value = clamp(value + delta, -256, 256);
+    //value = clamp(value + delta, -256, 256);
+    value = value + delta;
 
     points[index].w = value;
 }

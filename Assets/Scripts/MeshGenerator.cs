@@ -14,6 +14,7 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] ComputeShader remarch = null;
 
     Volume volume;
+    Dictionary<Vector3, int> hash = new Dictionary<Vector3, int>();
 
     readonly float isoLevel = 0;
     #endregion
@@ -251,8 +252,8 @@ public class MeshGenerator : MonoBehaviour
 
     int CompressVertices(ref Vector3[] vertices, out int[] triangles)
     {
-        Dictionary<Vector3, int> hash = new Dictionary<Vector3, int>();
         int index = 0;
+        hash.Clear();
 
         triangles = new int[vertices.Length];
         List<Vector3> vertexs = new List<Vector3>();
