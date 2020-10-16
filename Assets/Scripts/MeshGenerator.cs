@@ -107,9 +107,10 @@ public class MeshGenerator : MonoBehaviour
     }
 
     public void GetCubeIDs(Vector3 center, float radius, out Vector3 objectCenter, out Vector3 centerID, out Vector3 voxelRange, out Vector3 baseID, out Vector3 voxelCount, out Vector3Int threadCount)
-    {
-        objectCenter = transform.InverseTransformPoint(center) + volume.Size * 0.5f;
-        centerID = new Vector3(objectCenter.x / volume.VoxelSize.x, objectCenter.y / volume.VoxelSize.y, objectCenter.z / volume.VoxelSize.z);
+    {      
+        objectCenter = transform.InverseTransformPoint(center);
+        Vector3 baseCenter = objectCenter + volume.Size * 0.5f;
+        centerID = new Vector3(baseCenter.x / volume.VoxelSize.x, baseCenter.y / volume.VoxelSize.y, baseCenter.z / volume.VoxelSize.z);
         voxelRange = new Vector3(
             Mathf.CeilToInt(radius / volume.VoxelSize.x - 0.5f),
             Mathf.CeilToInt(radius / volume.VoxelSize.y - 0.5f),

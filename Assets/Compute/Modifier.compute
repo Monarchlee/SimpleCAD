@@ -22,12 +22,12 @@ int indexFromCoord(int x, int y, int z) {
 }
 
 [numthreads(numThreads,numThreads,numThreads)]
-void Modify (uint3 id : SV_DispatchThreadID)
+void Modify (int3 id : SV_DispatchThreadID)
 {
     int3 bas = int3((int)base.x, (int)base.y, (int)base.z);
 
     float3 cid = id + bas + float3(1,1,1);
-    if (cid.x >= numPointsX-1 || cid.y >= numPointsY-1 || cid.z >= numPointsZ-1) return;
+    if (cid.x >= numPointsX-1 || cid.y >= numPointsY-1 || cid.z >= numPointsZ-1 || cid.x <= 0 || cid.y <= 0 || cid.z <= 0) return;
     if( id.x >= voxelCount.x-1 || id.y >= voxelCount.y-1 || id.z >= voxelCount.z-1) return;
 
     int index = indexFromCoord(cid.x, cid.y, cid.z);
@@ -35,15 +35,16 @@ void Modify (uint3 id : SV_DispatchThreadID)
     float3 pos = points[index].xyz;
     float value = points[index].w;
 
-    float dis = clamp(length(pos - center), 0, radius);
+    //float dis = clamp(length(pos - center), 0, radius);
+    float dis = length(pos - center);
     float weight = clamp(dis / radius,0,1);
 
-    //if(dis > radius) return;
+    if(dis > radius) return;
 
     float delta = lerp(strength, strength * (1 - damping), weight);
 
-    //value = clamp(value + delta, -256, 256);
-    value = value + delta;
+    value = clamp(value + delta, -256, 256);
+    //value = value + delta;
 
     points[index].w = value;
 }

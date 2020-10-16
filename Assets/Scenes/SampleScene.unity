@@ -347,7 +347,7 @@ MonoBehaviour:
   march: {fileID: 7200000, guid: e6675a5747764487687871eed95a316b, type: 3}
   transfer: {fileID: 7200000, guid: b94971c2e711f784e8d8466126841bf6, type: 3}
   unpacker: {fileID: 7200000, guid: 85245a896882848439904f031af78ee4, type: 3}
-  recoverer: {fileID: 7200000, guid: b791e8d487a5a2940955e1596194abe1, type: 3}
+  recoverer: {fileID: 7200000, guid: da1a311847ffe304693013a2bee5d927, type: 3}
   modifier: {fileID: 7200000, guid: 29a5386344fe81a4fb5efe01c20d6ff8, type: 3}
   remarch: {fileID: 7200000, guid: d6ba9ded395a2704fa53675463b083cd, type: 3}
 --- !u!64 &414056359
@@ -895,9 +895,9 @@ MonoBehaviour:
   size: {x: 0.5, y: 0.5, z: 0.5}
   cursor: {fileID: 2222737571690788918, guid: 24445b3be998a2f43b5d8321c823f9fb, type: 3}
   generator: {fileID: 414056358}
-  radius: 4
-  strength: 50
-  damping: 0.1
+  radius: 1
+  strength: 30
+  damping: 0.8
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -37,7 +37,7 @@ void March (int3 id : SV_DispatchThreadID)
     int3 bas = int3((int)base.x, (int)base.y, (int)base.z);
 
     float3 cid = id + bas;
-    if (cid.x >= numPointsX-1 || cid.y >= numPointsY-1 || cid.z >= numPointsZ-1) return;
+    if (cid.x >= numPointsX-1 || cid.y >= numPointsY-1 || cid.z >= numPointsZ-1 || cid.x < 0 || cid.y < 0 || cid.z < 0) return;
     if( id.x >= voxelCount.x || id.y >= voxelCount.y || id.z >= voxelCount.z) return;
 
     // 8 corners of the current cube
