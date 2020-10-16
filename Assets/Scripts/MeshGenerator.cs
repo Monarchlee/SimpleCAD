@@ -12,6 +12,7 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField] ComputeShader recoverer = null;
     [SerializeField] ComputeShader modifier = null;
     [SerializeField] ComputeShader remarch = null;
+    [SerializeField] ComputeShader init = null;
 
     Volume volume;
     Dictionary<Vector3, int> hash = new Dictionary<Vector3, int>();
@@ -50,6 +51,24 @@ public class MeshGenerator : MonoBehaviour
 
         frontBuffer.SetCounterValue(0);
         backBuffer.SetCounterValue(0);
+    }
+
+    public void InitVolume(Volume volume, float radius)
+    {
+        ComputeBuffer buffer = new ComputeBuffer(volume.SamplesCount, sizeof(float));
+        init.SetBuffer(0, "data", buffer);
+        init.SetInt("numPointsX", volume.SamplesDensity.x);
+        init.SetInt("numPointsY", volume.SamplesDensity.y);
+        init.SetInt("numPointsZ", volume.SamplesDensity.z);
+        init.SetVector("centerID", (Vector3)volume.SamplesDensity * 0.5f);
+        init.SetVector("cellSize", volume.VoxelSize);
+        init.SetFloat("radius", radius);
+
+        init.Dispatch(0, volume.SamplesThreadCount.x, volume.SamplesThreadCount.y, volume.SamplesThreadCount.z);
+
+        buffer.GetData(volume.data);
+
+        buffer.Dispose();
     }
 
     public void WriteData(Volume volume)
@@ -137,7 +156,7 @@ public class MeshGenerator : MonoBehaviour
         recoverer.Dispatch(0, Mathf.CeilToInt(numTris / 256f), 1, 1);
 
         numTris = GetNumTris(backBuffer);
-        Debug.Log("Clear " + numTris + "(Remain)");
+        //Debug.Log("Clear " + numTris + "(Remain)");
 
         SwitchTriangleBuffers();
     }
@@ -171,7 +190,7 @@ public class MeshGenerator : MonoBehaviour
         remarch.Dispatch(0, threadCount.x, threadCount.y, threadCount.z);
 
         numTris = GetNumTris(frontBuffer);
-        Debug.Log("Remarch " + GetNumTris(frontBuffer) + "(front) :" + GetNumTris(backBuffer) + "(back)"); 
+        //Debug.Log("Remarch " + GetNumTris(frontBuffer) + "(front) :" + GetNumTris(backBuffer) + "(back)"); 
     }
 
     public Mesh GenerateMesh()
@@ -206,6 +225,7 @@ public class MeshGenerator : MonoBehaviour
         filter.mesh = mesh;
         collider.sharedMesh = mesh;
     }
+
     #endregion
 
     #region Lifetime
@@ -213,15 +233,11 @@ public class MeshGenerator : MonoBehaviour
     {
         filter = GetComponent<MeshFilter>();
         collider = GetComponent<MeshCollider>();
+    }
 
-        Volume sphere = new Volume();
-
-        InitBuffers(sphere);
-        ReadData(sphere);
-        MarchAll();
-        Mesh mesh = GenerateMesh();
-        SetMesh(mesh);
-        //UnloadBuffer();
+    private void OnDestroy()
+    {
+        UnloadBuffer();
     }
     #endregion
 

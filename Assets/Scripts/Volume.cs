@@ -47,9 +47,9 @@ namespace VolumeData
         /// <summary>
         /// 这个构造函数用于返回一个球体
         /// </summary>
-        public Volume()
+        /*public Volume()
         {
-            Size = Vector3.one * 15;
+            Size = Vector3.one * 20;
             SamplesDensity = Vector3Int.one * 64;
             Vector3 center = Vector3.one * 31.5f;
             data = new float[SamplesCount];
@@ -64,7 +64,7 @@ namespace VolumeData
                     }
                 }
             }
-        }
+        }*/
 
         #region 属性
         /// <summary>
