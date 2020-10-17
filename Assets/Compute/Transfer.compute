@@ -13,7 +13,7 @@ RWStructuredBuffer<float> datas;
 RWStructuredBuffer<float4> points;
 
 int indexFromCoord(int x, int y, int z) {
-    return y * numPointsY * numPointsX + x * numPointsX + z;
+    return y * numPointsX * numPointsZ + x * numPointsZ + z;
 }
 
 [numthreads(numThreads,numThreads,numThreads)]

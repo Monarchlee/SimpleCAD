@@ -95,7 +95,7 @@ namespace VolumeData
 
         private int GetIndex(Vector3Int v)
         {
-            return (v.y * SamplesDensity.y + v.x) * SamplesDensity.x + v.z;
+            return (v.y * SamplesDensity.x + v.x) * SamplesDensity.z + v.z;
         }
 
         /// <summary>

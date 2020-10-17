@@ -11,5 +11,5 @@ float spacing;
 float3 worldSize;
 
 int indexFromCoord(uint x, uint y, uint z) {
-    return y * numPointsY * numPointsX + x * numPointsX + z;
+    return y * numPointsX * numPointsZ + x * numPointsZ + z;
 }

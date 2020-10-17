@@ -896,9 +896,9 @@ MonoBehaviour:
   size: {x: 0.5, y: 0.5, z: 0.5}
   cursor: {fileID: 2222737571690788918, guid: 24445b3be998a2f43b5d8321c823f9fb, type: 3}
   generator: {fileID: 414056358}
-  canvasSize: {x: 50, y: 50, z: 50}
-  canvasDensity: {x: 200, y: 200, z: 200}
-  initSphereRadius: 8
+  canvasSize: {x: 20, y: 40, z: 20}
+  canvasDensity: {x: 20, y: 40, z: 20}
+  initSphereRadius: 3.5
   radius: 1
   strength: 1
   damping: 1
@@ -920,7 +920,7 @@ MonoBehaviour:
   rotateSpeed: 6
   moveSpeed: 2
   scrollSpeed: 10
-  dragSpeed: 6
+  dragSpeed: 3
 --- !u!1 &988328926
 GameObject:
   m_ObjectHideFlags: 0
