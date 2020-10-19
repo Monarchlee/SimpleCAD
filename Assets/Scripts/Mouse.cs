@@ -11,6 +11,7 @@ public class Mouse : MonoBehaviour
     private Vector3 position = new Vector3(0, 0, 0);
     [SerializeField] GameObject cursor = null;
     [SerializeField] MeshGenerator generator = null;
+    [SerializeField] public Volume target = null;
 
     [SerializeField] Vector3 canvasSize = Vector3.one * 16;
     [SerializeField] Vector3Int canvasDensity = Vector3Int.one * 64;
@@ -37,11 +38,11 @@ public class Mouse : MonoBehaviour
         cursor.transform.position = position;
         cursor.SetActive(false);
 
-        Volume sphere = new Volume(canvasSize, canvasDensity);
-        generator.InitVolume(sphere, initSphereRadius);
+        target = new Volume(canvasSize, canvasDensity);
+        generator.InitVolume(target, initSphereRadius);
 
-        generator.InitBuffers(sphere);
-        generator.ReadData(sphere);
+        generator.InitBuffers(target);
+        generator.ReadData(target);
         generator.MarchAll();
         Mesh mesh = generator.GenerateMesh();
         generator.SetMesh(mesh);
@@ -64,6 +65,7 @@ public class Mouse : MonoBehaviour
                 foreach(Vector3 p in pos) Modify(p, radius);
                 Mesh mesh = generator.GenerateMesh();
                 generator.SetMesh(mesh);
+                UI.isSave = false;
             }
         }
     }
@@ -108,5 +110,15 @@ public class Mouse : MonoBehaviour
         generator.CleanTriangles(centerID, voxelRange);
         generator.Modify(baseID, voxelCount, threadCount, objectCenter, radius, strength, damping);
         generator.Remarch(baseID, voxelCount, threadCount);
+    }
+    public void Redo()
+    {
+        generator.InitVolume(target, initSphereRadius);
+
+        generator.InitBuffers(target);
+        generator.ReadData(target);
+        generator.MarchAll();
+        Mesh mesh = generator.GenerateMesh();
+        generator.SetMesh(mesh);
     }
 }
