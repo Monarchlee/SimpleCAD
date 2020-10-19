@@ -16,9 +16,11 @@ public class Mouse : MonoBehaviour
     [SerializeField] Vector3Int canvasDensity = Vector3Int.one * 64;
     [SerializeField] float initSphereRadius = 10;
 
-    [SerializeField] float radius = 1;
-    [SerializeField] float strength = 1;
-    [SerializeField] float damping = 0;
+    [SerializeField] static public float radius = 10;
+    [SerializeField] static public float strength = 10;
+    [SerializeField] static public float damping = 1;
+    [SerializeField] static public bool iseraser = false;
+    [SerializeField] static public int shape = 0;    //sphere:0 cube:1
 
     public bool mirror_x = false;
     public bool mirror_y = false;
