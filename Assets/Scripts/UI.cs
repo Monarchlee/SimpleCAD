@@ -114,6 +114,22 @@ public class UI : MonoBehaviour
         Toggle toggle = rootBrush.transform.Find("Eraser").GetComponent<Toggle>();
         Mouse.iseraser = toggle.isOn;
     }
+    public void MirrorXOn()
+    {
+        Toggle toggle = rootBrush.transform.Find("MirrorX").GetComponent<Toggle>();
+        Mouse.mirror_x = toggle.isOn;
+        Debug.Log(Mouse.mirror_x);
+    }
+    public void MirrorYOn()
+    {
+        Toggle toggle = rootBrush.transform.Find("MirrorY").GetComponent<Toggle>();
+        Mouse.mirror_y = toggle.isOn;
+    }
+    public void MirrorZOn()
+    {
+        Toggle toggle = rootBrush.transform.Find("MirrorZ").GetComponent<Toggle>();
+        Mouse.mirror_z = toggle.isOn;
+    }
     public void ShapeChange()
     {
         Dropdown dropdown= rootBrush.transform.Find("Shape").GetComponent<Dropdown>();
