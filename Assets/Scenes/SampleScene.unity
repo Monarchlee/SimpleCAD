@@ -1260,7 +1260,7 @@ MonoBehaviour:
   march: {fileID: 7200000, guid: e6675a5747764487687871eed95a316b, type: 3}
   transfer: {fileID: 7200000, guid: b94971c2e711f784e8d8466126841bf6, type: 3}
   unpacker: {fileID: 7200000, guid: 85245a896882848439904f031af78ee4, type: 3}
-  recoverer: {fileID: 7200000, guid: b791e8d487a5a2940955e1596194abe1, type: 3}
+  recoverer: {fileID: 7200000, guid: da1a311847ffe304693013a2bee5d927, type: 3}
   modifier: {fileID: 7200000, guid: 29a5386344fe81a4fb5efe01c20d6ff8, type: 3}
   remarch: {fileID: 7200000, guid: d6ba9ded395a2704fa53675463b083cd, type: 3}
   init: {fileID: 7200000, guid: 2498fbaeee03f0542868df891b02d49b, type: 3}
@@ -1422,10 +1422,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 1909976796}
   m_HandleRect: {fileID: 1845836089}
   m_Direction: 0
-  m_MinValue: 0
+  m_MinValue: 1
   m_MaxValue: 10
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -1524,7 +1524,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1659637115}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 10
+  m_MaxValue: 5
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -2833,12 +2833,9 @@ MonoBehaviour:
   target:
     data: []
     Size: {x: 0, y: 0, z: 0}
-  canvasSize: {x: 20, y: 40, z: 20}
-  canvasDensity: {x: 20, y: 40, z: 20}
-  initSphereRadius: 3.5
-  mirror_x: 0
-  mirror_y: 0
-  mirror_z: 0
+  canvasSize: {x: 100, y: 100, z: 100}
+  canvasDensity: {x: 128, y: 128, z: 128}
+  initSphereRadius: 5
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
