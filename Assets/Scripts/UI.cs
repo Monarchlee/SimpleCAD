@@ -102,7 +102,7 @@ public class UI : MonoBehaviour
     public void StrengthChange()
     {
         Slider slider = rootBrush.transform.Find("BrushStrength").GetComponent<Slider>();
-        Mouse.strength = slider.value;
+        Mouse.strength = Mouse.iseraser? -slider.value:slider.value;
     }
     public void DampingChange()
     {
@@ -113,6 +113,7 @@ public class UI : MonoBehaviour
     {
         Toggle toggle = rootBrush.transform.Find("Eraser").GetComponent<Toggle>();
         Mouse.iseraser = toggle.isOn;
+        Mouse.strength = -Mouse.strength;
     }
     public void MirrorXOn()
     {
