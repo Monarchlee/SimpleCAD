@@ -50,7 +50,8 @@ public class UI : MonoBehaviour
     {
         if (isSave)
             UnityEngine.Application.Quit();
-        else;
+        else
+            UnityEngine.Application.Quit();
             //todo;
     }
     public void BackWardClick()
