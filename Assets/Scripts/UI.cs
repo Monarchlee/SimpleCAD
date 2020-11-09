@@ -21,6 +21,10 @@ public class UI : MonoBehaviour
         GameObject.Find("Open").SetActive(isDisplay);
         GameObject.Find("Save").SetActive(isDisplay);
         GameObject.Find("SaveAs").SetActive(isDisplay);
+
+        SizeChange();
+        StrengthChange();
+        DampingChange();
     }
 
     // Update is called once per frame
